@@ -1,0 +1,74 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-gunmetal: #2e2a26;
+  --color-gunmetal-deep: #201d1a;
+  --color-ivory: #efe7d2;
+  --color-brass: #c7972e;
+  --color-oxblood: #5c1a1b;
+  --color-verdigris: #4a7c6f;
+
+  --font-display: var(--font-playfair);
+  --font-lore: var(--font-cardo);
+  --font-mono: var(--font-space-mono);
+}
+
+body {
+  background: var(--color-gunmetal);
+  color: var(--color-ivory);
+}
+
+::selection {
+  background: var(--color-brass);
+  color: var(--color-gunmetal);
+}
+
+a {
+  color: inherit;
+}
+
+/* Grain overlay: static SVG turbulence noise, low opacity, never animated */
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 40;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
+.vignette {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 39;
+  background: radial-gradient(ellipse at center, transparent 45%, rgba(0, 0, 0, 0.45) 100%);
+}
+
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-track {
+  animation: marquee-scroll 32s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none !important;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
