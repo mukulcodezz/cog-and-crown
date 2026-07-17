@@ -1,138 +1,131 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import ReliquaryFrame from "@/components/ReliquaryFrame";
 import ScrollReveal from "@/components/ScrollReveal";
-import { BRAND, MINT_FAQS, WALLETS, MINT_PREVIEW_IMAGE } from "@/lib/content";
+import { BANNER_MINT, BRAND, GRADES, MINT_FAQS, RELIQUARIES, WALLETS } from "@/lib/content";
+
+type PreviewStatus = "idle" | "pending" | "complete";
 
 export default function MintClient() {
+  const reduce = useReducedMotion();
   const [qty, setQty] = useState(1);
+  const [idx, setIdx] = useState(2);
+  const [status, setStatus] = useState<PreviewStatus>("idle");
+  const [manualGrade, setManualGrade] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (reduce || manualGrade || status !== "idle") return;
+    const cycle = setInterval(() => setIdx((value) => (value + 1) % RELIQUARIES.length), 2400);
+    return () => clearInterval(cycle);
+  }, [manualGrade, reduce, status]);
+
+  useEffect(() => () => {
+    if (timer.current) clearTimeout(timer.current);
+  }, []);
+
+  const runPreview = () => {
+    if (timer.current) clearTimeout(timer.current);
+    setStatus("pending");
+    timer.current = setTimeout(() => setStatus("complete"), reduce ? 0 : 1200);
+  };
+
+  const selectGrade = (index: number) => {
+    setIdx(index);
+    setManualGrade(true);
+    setStatus("idle");
+  };
+
+  const grade = GRADES[idx];
+  const reliquary = RELIQUARIES[idx];
   const total = (qty * BRAND.price).toFixed(1);
-  const mintedPct = ((BRAND.minted / BRAND.supply) * 100).toFixed(1);
 
   return (
-    <div className="mx-auto max-w-2xl px-6 pb-24 pt-24 md:px-10 md:pt-32">
-      <div className="mb-16 text-center">
-        <div className="font-mono text-[11px] tracking-[0.2em] text-verdigris mb-5">
-          MINT // INVESTITURE RITE
+    <div>
+      <header className="relative min-h-[300px] w-full overflow-hidden md:min-h-[380px]">
+        <Image src={BANNER_MINT} alt="" fill priority sizes="100vw" className="object-cover object-right opacity-50" />
+        <div className="absolute inset-0 bg-gradient-to-r from-gunmetal via-gunmetal/85 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-gunmetal to-transparent" />
+        <div className="relative mx-auto flex min-h-[300px] max-w-7xl flex-col justify-center gap-3 px-6 py-16 md:min-h-[380px] md:px-10">
+          <div className="font-mono text-[11px] tracking-[0.22em] text-verdigris">MINT // THE POUR</div>
+          <h1 className="font-display text-[42px] font-black leading-[0.95] tracking-tight md:text-[72px]">Pour your seam.</h1>
+          <p className="max-w-xl font-lore text-[18px] italic leading-relaxed text-ivory/80">
+            {BRAND.supply.toLocaleString()} masks wait to be mended. The gold is poured the moment you claim — no blind box.
+          </p>
         </div>
-        <h1 className="font-display text-[42px] font-black leading-[1.02] tracking-tight mb-8 md:text-[68px]">
-          BIND YOUR TITLE
-          <br />
-          TO THE CROWN
-        </h1>
-        <p className="font-lore italic text-[20px] leading-relaxed text-ivory/75 mx-auto max-w-lg">
-          4,096 seats remain at the mechanism. Each mint winds a new gear. There is no melting
-          down what the court has cast.
-        </p>
-      </div>
+      </header>
 
-      <div className="mb-16 border border-brass/30 bg-gunmetal-deep p-8 shadow-[0_0_40px_rgba(199,151,46,0.1)]">
-        <div className="mb-8 flex items-center gap-6">
-          <div className="relative h-[110px] w-[110px] shrink-0 overflow-hidden border border-brass/25">
-            <Image src={MINT_PREVIEW_IMAGE} alt="Peerage preview render" fill sizes="110px" className="object-cover" />
-          </div>
-          <div className="flex-1">
-            <div className="font-mono text-[10px] tracking-[0.1em] text-verdigris mb-1.5">
-              WIND GAUGE
-            </div>
-            <div className="relative h-[12px] w-full border border-ivory/25">
-              <div
-                className="absolute inset-y-0 left-0"
-                style={{ width: "80%", background: "linear-gradient(to right, #5C1A1B, #C7972E)" }}
-              />
-            </div>
-            <div className="mt-2 font-mono text-[10px] tracking-wider text-ivory/40">
-              PRESSURE: OPTIMAL
-            </div>
-          </div>
-        </div>
-
-        <div className="mb-5 flex items-center justify-between text-[13px]">
-          <span className="font-mono text-ivory/60">PRICE PER SEAT</span>
-          <span className="font-display text-xl font-bold">{BRAND.price} SOL</span>
-        </div>
-
-        <div className="mb-6 flex items-center justify-between border border-ivory/20 px-4 py-4">
-          <button
-            onClick={() => setQty((q) => Math.max(1, q - 1))}
-            className="w-8 font-mono text-xl text-brass cursor-pointer hover:brightness-125 transition-all"
-            aria-label="Decrease quantity"
-          >
-            −
-          </button>
-          <span className="font-mono text-lg">{qty}</span>
-          <button
-            onClick={() => setQty((q) => Math.min(10, q + 1))}
-            className="w-8 font-mono text-xl text-brass cursor-pointer hover:brightness-125 transition-all"
-            aria-label="Increase quantity"
-          >
-            +
-          </button>
-        </div>
-
-        <div className="mb-8 flex justify-between border-t border-ivory/10 pt-4 font-mono text-sm">
-          <span className="text-ivory/60">TOTAL INVESTITURE</span>
-          <span className="font-bold text-ivory">{total} SOL</span>
-        </div>
-
-        <button
-          onClick={() => alert("Binding... (connect a wallet to mint for real)")}
-          className="mb-4 w-full bg-brass py-5 font-mono text-xs font-bold uppercase tracking-[0.2em] text-gunmetal shadow-[0_0_30px_rgba(199,151,46,0.35)] cursor-pointer hover:brightness-110 transition"
-        >
-          MINT {qty} PEERAGE{qty > 1 ? "S" : ""}
-        </button>
-        <div className="text-center font-mono text-[9px] uppercase tracking-[0.15em] text-ivory/30">
-          Gas + protocol fee included. No refunds from the mechanism.
-        </div>
-      </div>
-
-      <div className="mb-20">
-        <div className="mb-8 border border-brass/25 bg-gunmetal-deep p-8">
-          <div className="mb-4 flex justify-between font-mono text-[11px] tracking-[0.2em] text-ivory/60">
-            <span>MINTED STATUS</span>
-            <span className="text-ivory">
-              {BRAND.minted.toLocaleString()} / {BRAND.supply.toLocaleString()}
-            </span>
-          </div>
-          <div className="relative h-2 bg-ivory/10">
-            <div
-              className="absolute inset-y-0 left-0 bg-brass shadow-[0_0_12px_rgba(199,151,46,0.6)]"
-              style={{ width: `${mintedPct}%` }}
+      <div className="mx-auto max-w-4xl px-6 pb-24 pt-14 md:px-10">
+        <div className="grid gap-8 border border-brass/25 bg-gunmetal-deep p-6 md:grid-cols-[1fr_1.05fr] md:p-8">
+          <div className="relative aspect-[4/5] overflow-hidden border border-brass/20">
+            <AnimatePresence mode="wait">
+              <motion.div key={reliquary.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: reduce ? 0 : 0.35 }} className="absolute inset-0">
+                <ReliquaryFrame src={reliquary.src} grade={grade.key} alt={grade.name} className="h-full w-full" sizes="(max-width: 768px) 90vw, 420px" />
+              </motion.div>
+            </AnimatePresence>
+            <motion.div
+              aria-hidden
+              className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-brass/80 via-brass/30 to-transparent mix-blend-screen"
+              initial={false}
+              animate={{ scaleY: status === "pending" ? 1 : grade.gild, opacity: status === "complete" ? 0.9 : 0.65 }}
+              style={{ height: "100%", transformOrigin: "bottom" }}
+              transition={{ duration: reduce ? 0 : 0.8, ease: [0.22, 1, 0.36, 1] }}
             />
           </div>
+
+          <div className="flex flex-col justify-center">
+            <div className="font-mono text-[10px] tracking-[0.14em] text-verdigris">WHAT YOU MIGHT POUR</div>
+            <h2 className="mt-2 font-display text-3xl font-bold">{grade.name}</h2>
+            <p className="mt-2 font-lore text-[16px] italic leading-relaxed text-ivory/70">{grade.desc}</p>
+            <div className="mt-5 h-2 bg-ivory/10" role="progressbar" aria-label={`${grade.name} gild study`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(grade.gild * 100)}>
+              <motion.div className="h-full bg-brass" animate={{ scaleX: grade.gild }} style={{ transformOrigin: "left" }} transition={{ duration: reduce ? 0 : 0.4 }} />
+            </div>
+            <div className="mt-5 grid grid-cols-3 gap-2" aria-label="Grade preview controls">
+              {GRADES.map((item, index) => (
+                <button key={item.key} type="button" onClick={() => selectGrade(index)} aria-pressed={idx === index} className={`min-h-11 border px-2 font-mono text-[9px] tracking-[0.08em] transition duration-300 active:translate-y-px ${idx === index ? "border-brass bg-brass text-gunmetal-deep" : "border-ivory/20 text-ivory/65 hover:border-verdigris hover:text-verdigris"}`}>
+                  {item.name}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-3">
-          {WALLETS.map((w) => (
-            <div
-              key={w}
-              className="border border-ivory/15 py-4 text-center font-mono text-[10px] uppercase tracking-[0.1em] text-ivory/70"
-            >
-              {w}
-            </div>
-          ))}
-        </div>
-        <div className="mt-4 text-center font-mono text-[10px] uppercase tracking-[0.1em] text-ivory/30">
-          Direct binding supported via major Solana vessels
-        </div>
+        <section className="mt-8 border border-brass/25 bg-gunmetal-deep p-6 md:p-8" aria-labelledby="preview-controls-title">
+          <div className="mb-1 font-mono text-[10px] tracking-[0.14em] text-verdigris">THE POUR</div>
+          <h2 id="preview-controls-title" className="font-display text-2xl font-bold">Choose your quantity</h2>
+          <div className="mt-4 flex items-center justify-between border-b border-ivory/10 pb-4 text-sm"><span className="text-ivory/60">PRICE PER MASK</span><strong className="font-display text-xl">{BRAND.price} SOL</strong></div>
+          <div className="mt-6 flex items-center justify-between border border-ivory/20 px-3 py-2">
+            <button type="button" onClick={() => setQty((value) => Math.max(1, value - 1))} disabled={qty === 1 || status === "pending"} className="min-h-11 min-w-11 text-xl text-brass disabled:cursor-not-allowed disabled:opacity-30" aria-label="Decrease preview quantity">−</button>
+            <span className="font-mono text-lg tabular-nums" aria-live="polite">{qty}</span>
+            <button type="button" onClick={() => setQty((value) => Math.min(10, value + 1))} disabled={qty === 10 || status === "pending"} className="min-h-11 min-w-11 text-xl text-brass disabled:cursor-not-allowed disabled:opacity-30" aria-label="Increase preview quantity">+</button>
+          </div>
+          <div className="mt-4 flex items-center justify-between font-mono text-sm"><span className="text-ivory/60">TOTAL POUR</span><strong>{total} SOL</strong></div>
+          <button type="button" onClick={runPreview} disabled={status === "pending"} className="mt-5 min-h-12 w-full bg-brass px-6 font-mono text-xs font-bold uppercase tracking-[0.18em] text-gunmetal-deep transition duration-300 hover:-translate-y-0.5 active:translate-y-px disabled:cursor-wait disabled:opacity-70">
+            {status === "pending" ? "POURING…" : status === "complete" ? "POUR AGAIN" : `MEND ${qty} MASK${qty > 1 ? "S" : ""}`}
+          </button>
+          <div role="status" aria-live="polite" className="mt-4 min-h-6 border-l-2 border-verdigris pl-3 text-[13px] text-ivory/70">
+            {status === "idle" && "Ready to pour."}
+            {status === "pending" && "The gold is pouring."}
+            {status === "complete" && "The gold is poured."}
+          </div>
+        </section>
+
+        <section className="mt-12" aria-labelledby="compatibility-title">
+          <h2 id="compatibility-title" className="font-display text-2xl font-bold">Supported wallets</h2>
+          <p className="mt-2 max-w-2xl text-[14px] leading-relaxed text-ivory/65">Pour directly via any major Solana wallet.</p>
+          <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            {WALLETS.map((wallet) => <div key={wallet} className="border border-ivory/15 px-4 py-4 text-center font-mono text-[10px] tracking-[0.1em] text-ivory/70">{wallet}</div>)}
+          </div>
+        </section>
+
+        <ScrollReveal className="mt-14 border-t border-brass/20 pt-12">
+          <h2 className="mb-6 font-display text-2xl font-bold">Questions at the Pour</h2>
+          {MINT_FAQS.map((item) => <article key={item.q} className="border-b border-ivory/10 py-5"><h3 className="font-mono text-[12px] tracking-[0.1em] text-verdigris">{item.q}</h3><p className="mt-2 font-lore text-[16px] leading-relaxed text-ivory/75">{item.a}</p></article>)}
+        </ScrollReveal>
       </div>
-
-      <ScrollReveal className="border-t border-brass/20 pt-16">
-        <h2 className="font-display text-[26px] font-bold tracking-tight text-center mb-10">
-          FREQUENTLY WOUND QUESTIONS
-        </h2>
-        <div>
-          {MINT_FAQS.map((f) => (
-            <div key={f.q} className="border-b border-ivory/10 py-6">
-              <div className="mb-3 font-mono text-[14px] font-bold uppercase tracking-[0.1em] text-verdigris">
-                {f.q}
-              </div>
-              <div className="font-lore text-[14px] leading-relaxed text-ivory/65">{f.a}</div>
-            </div>
-          ))}
-        </div>
-      </ScrollReveal>
     </div>
   );
 }

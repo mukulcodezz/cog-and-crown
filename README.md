@@ -1,17 +1,17 @@
-# Cog & Crown
+# Ash & Gilt
 
-A steampunk royal-court NFT collection site — 4,096 minted peerages of a clockwork empire, on Solana.
+A kintsugi-inspired NFT collection site — 222 masks broken once and mended in gold, on Solana.
 
 Built with Next.js (App Router), TypeScript, Tailwind CSS v4, and Framer Motion.
 
 ## Pages
 
-- **Home** — hero, live stats, showcase
-- **Mint** — quantity stepper, mint progress, FAQ
-- **Roadmap** — "The Great Mechanism": filterable/expandable 6-hour timeline
-- **Gallery** — the peerage roll
-- **Lore** — the Royal Decree, court structure
-- **Partners** — infrastructure partners
+- **Home** — hero, live stats, and collection showcase
+- **Mint** — quantity stepper, mint progress, and FAQ
+- **Roadmap** — the six-seam 3D mending procession
+- **Gallery** — the Reliquary wall and grade filters
+- **Lore** — the Order's Scripture
+- **Partners** — infrastructure allies
 
 ## Development
 
