@@ -4,7 +4,7 @@ export const BRAND = {
   token: "$GILT",
   chain: "Solana",
   supply: 222,
-  minted: 5610,
+  minted: 152,
   price: 0.8,
   status: "The Mending Is Open",
   tagline: "Nothing whole is holy.",
