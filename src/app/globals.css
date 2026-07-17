@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 @theme inline {
+  /* Palette kept identical — the "brown theme" the brand is built on */
   --color-gunmetal: #2e2a26;
   --color-gunmetal-deep: #201d1a;
   --color-ivory: #efe7d2;
@@ -8,14 +9,36 @@
   --color-oxblood: #5c1a1b;
   --color-verdigris: #4a7c6f;
 
-  --font-display: var(--font-playfair);
-  --font-lore: var(--font-cardo);
-  --font-mono: var(--font-space-mono);
+  /* Fonts changed — new editorial voice */
+  --font-display: var(--font-fraunces);
+  --font-lore: var(--font-eb-garamond);
+  --font-mono: var(--font-plex-mono);
 }
 
 body {
   background: var(--color-gunmetal);
   color: var(--color-ivory);
+}
+
+html { scroll-behavior: smooth; }
+
+.skip-link {
+  position: fixed;
+  left: 1rem;
+  top: 0.5rem;
+  z-index: 60;
+  transform: translateY(-160%);
+  background: var(--color-brass);
+  color: var(--color-gunmetal-deep);
+  padding: 0.75rem 1rem;
+  font-weight: 700;
+  transition: transform 250ms ease;
+}
+.skip-link:focus { transform: translateY(0); }
+
+:focus-visible {
+  outline: 2px solid var(--color-verdigris);
+  outline-offset: 4px;
 }
 
 ::selection {
@@ -26,6 +49,8 @@ body {
 a {
   color: inherit;
 }
+
+/* ---- Ambient overlays ---- */
 
 /* Grain overlay: static SVG turbulence noise, low opacity, never animated */
 .grain-overlay {
@@ -43,24 +68,127 @@ a {
   inset: 0;
   pointer-events: none;
   z-index: 39;
-  background: radial-gradient(ellipse at center, transparent 45%, rgba(0, 0, 0, 0.45) 100%);
+  background: radial-gradient(ellipse at center, transparent 45%, rgba(0, 0, 0, 0.5) 100%);
 }
 
+/* ---- Type helpers ---- */
+
+/* Molten-gold text: brass sheen with a bright specular sweep */
+.text-gold {
+  background: linear-gradient(92deg, #8a6a1e 0%, #c7972e 35%, #f0d488 50%, #c7972e 65%, #8a6a1e 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.hairline {
+  border-color: rgba(199, 151, 46, 0.16);
+}
+
+/* Thin decorative gold rule */
+.rule-gold {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(199, 151, 46, 0.5), transparent);
+}
+
+/* Gold-seam hover reveal: the crack draws itself in gold when the card is hovered */
+.seam-path {
+  stroke-dasharray: 640;
+  stroke-dashoffset: 640;
+  transition: stroke-dashoffset 0.9s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease;
+  opacity: 0;
+}
+.group:hover .seam-path {
+  stroke-dashoffset: 0;
+  opacity: 1;
+}
+
+/* Illuminated drop-cap for Scripture */
+.dropcap::first-letter {
+  float: left;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 4.2rem;
+  line-height: 0.82;
+  padding: 0.05em 0.14em 0 0;
+  background: linear-gradient(160deg, #8a6a1e, #c7972e 45%, #f0d488);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ---- Keyframes ---- */
+
 @keyframes marquee-scroll {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
 }
 
 .marquee-track {
-  animation: marquee-scroll 32s linear infinite;
+  animation: marquee-scroll 34s linear infinite;
 }
 
+/* CTA specular sweep (used on primary buttons) */
+@keyframes gild-sweep {
+  0% { transform: translateX(-120%); }
+  60%, 100% { transform: translateX(220%); }
+}
+.gild-sweep {
+  animation: gild-sweep 3.6s ease-in-out infinite;
+}
+
+/* Pulsing gold-vein glow for the live seam */
+@keyframes vein-pulse {
+  0%, 100% { opacity: 0.35; filter: drop-shadow(0 0 6px rgba(199, 151, 46, 0.35)); }
+  50% { opacity: 1; filter: drop-shadow(0 0 18px rgba(199, 151, 46, 0.75)); }
+}
+.vein-pulse { animation: vein-pulse 3.2s ease-in-out infinite; }
+
+/* Drifting gold dust motes */
+@keyframes dust-drift {
+  0% { transform: translate3d(0, 0, 0); opacity: 0; }
+  10% { opacity: 0.9; }
+  90% { opacity: 0.6; }
+  100% { transform: translate3d(14px, -60px, 0); opacity: 0; }
+}
+.dust-mote {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 9999px;
+  background: rgba(240, 212, 136, 0.9);
+  box-shadow: 0 0 6px rgba(199, 151, 46, 0.8);
+  animation: dust-drift 7s linear infinite;
+}
+
+/* Slow rotation for the hero sigil ring */
+@keyframes sigil-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.sigil-spin { animation: sigil-spin 60s linear infinite; }
+
+/* 3D procession: perspective stage + idle float for the steles */
+.stage-3d {
+  perspective: 1400px;
+  perspective-origin: 50% 42%;
+}
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+@keyframes stele-float {
+  0%, 100% { transform: translateY(0) rotateX(0deg); }
+  50% { transform: translateY(-6px) rotateX(1.4deg); }
+}
+.stele-float { animation: stele-float 6s ease-in-out infinite; }
+
 @media (prefers-reduced-motion: reduce) {
-  .marquee-track {
+  .marquee-track,
+  .gild-sweep,
+  .vein-pulse,
+  .dust-mote,
+  .sigil-spin,
+  .stele-float {
     animation: none !important;
   }
   *,

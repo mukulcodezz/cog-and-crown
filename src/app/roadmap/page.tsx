@@ -1,11 +1,7 @@
-import type { Metadata } from "next";
 import RoadmapClient from "./RoadmapClient";
+import { createPageMetadata } from "@/lib/site";
 
-export const metadata: Metadata = {
-  title: "Roadmap — The Great Mechanism",
-  description:
-    "Six Hours of the Great Mechanism: live status, receipts, and what's shipping now for Cog & Crown.",
-};
+export const metadata = createPageMetadata({ title: "The Mending", description: "Six seams, poured in order. Walk the 3D procession — live status, receipts, and what's pouring now.", path: "/roadmap", image: "/images/og-roadmap.jpg" });
 
 export default function RoadmapPage() {
   return <RoadmapClient />;
